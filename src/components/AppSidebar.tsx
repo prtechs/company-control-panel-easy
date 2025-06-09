@@ -7,7 +7,8 @@ import {
   BarChart3,
   Shield,
   Bell,
-  LogOut
+  LogOut,
+  MessageCircle
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 const menuItems = [
   {
@@ -31,6 +33,12 @@ const menuItems = [
     url: "#dashboard",
     icon: LayoutDashboard,
     isActive: true,
+  },
+  {
+    title: "Live Chat",
+    url: "#live-chat",
+    icon: MessageCircle,
+    badge: "3"
   },
   {
     title: "Users",
@@ -97,6 +105,11 @@ export function AppSidebar() {
                     <a href={item.url} className="flex items-center gap-3">
                       <item.icon className="w-4 h-4" />
                       <span className="font-medium">{item.title}</span>
+                      {item.badge && (
+                        <Badge variant="destructive" className="ml-auto text-xs">
+                          {item.badge}
+                        </Badge>
+                      )}
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
