@@ -15,13 +15,15 @@ import {
   Settings,
   Plus,
   MessageCircle,
-  LayoutDashboard
+  LayoutDashboard,
+  Globe
 } from "lucide-react";
 import { MetricsCard } from "@/components/MetricsCard";
 import { RecentActivity } from "@/components/RecentActivity";
 import { UserChart } from "@/components/UserChart";
 import { LiveChat } from "@/components/LiveChat";
 import { ChatStats } from "@/components/ChatStats";
+import { ContentManagement } from "@/components/ContentManagement";
 
 export function DashboardContent() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -51,10 +53,14 @@ export function DashboardContent() {
 
       {/* Navigation Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <LayoutDashboard className="w-4 h-4" />
             Overview
+          </TabsTrigger>
+          <TabsTrigger value="content" className="flex items-center gap-2">
+            <Globe className="w-4 h-4" />
+            Website Content
           </TabsTrigger>
           <TabsTrigger value="live-chat" className="flex items-center gap-2">
             <MessageCircle className="w-4 h-4" />
@@ -146,9 +152,9 @@ export function DashboardContent() {
                   <Users className="w-6 h-6" />
                   <span>Manage Users</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
+                <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => setActiveTab("content")}>
                   <FileText className="w-6 h-6" />
-                  <span>Create Content</span>
+                  <span>Edit Website</span>
                 </Button>
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
                   <Settings className="w-6 h-6" />
@@ -161,6 +167,10 @@ export function DashboardContent() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="content" className="space-y-6">
+          <ContentManagement />
         </TabsContent>
 
         <TabsContent value="live-chat" className="space-y-6">
