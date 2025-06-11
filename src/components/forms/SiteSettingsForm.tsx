@@ -5,27 +5,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 
-export function SiteSettingsForm() {
-  const { toast } = useToast();
+interface SiteSettingsFormProps {
+  initialData?: any;
+  onSave: (data: any) => void;
+  onCancel: () => void;
+}
+
+export function SiteSettingsForm({ initialData, onSave, onCancel }: SiteSettingsFormProps) {
   const [settings, setSettings] = useState({
-    siteName: "Klypso Tech",
-    tagline: "Innovative Technology Solutions",
-    description: "We provide cutting-edge technology solutions for businesses worldwide.",
-    contactEmail: "info@klypsotech.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Tech Street, Innovation City, IC 12345",
+    siteName: initialData?.siteName || "Klypso Tech",
+    tagline: initialData?.tagline || "Innovative Technology Solutions",
+    description: initialData?.description || "We provide cutting-edge technology solutions for businesses worldwide.",
+    contactEmail: initialData?.contactEmail || "info@klypsotech.com",
+    phone: initialData?.phone || "+1 (555) 123-4567",
+    address: initialData?.address || "123 Tech Street, Innovation City, IC 12345",
     socialLinks: {
-      facebook: "https://facebook.com/klypsotech",
-      twitter: "https://twitter.com/klypsotech",
-      linkedin: "https://linkedin.com/company/klypsotech",
-      instagram: "https://instagram.com/klypsotech"
+      facebook: initialData?.socialLinks?.facebook || "https://facebook.com/klypsotech",
+      twitter: initialData?.socialLinks?.twitter || "https://twitter.com/klypsotech",
+      linkedin: initialData?.socialLinks?.linkedin || "https://linkedin.com/company/klypsotech",
+      instagram: initialData?.socialLinks?.instagram || "https://instagram.com/klypsotech"
     },
-    seoTitle: "Klypso Tech - Innovative Technology Solutions",
-    seoDescription: "Professional web development, mobile apps, and cybersecurity services. Transform your business with our cutting-edge technology solutions.",
-    heroTitle: "Transform Your Business with Innovative Technology",
-    heroSubtitle: "We create powerful digital solutions that drive growth and success"
+    seoTitle: initialData?.seoTitle || "Klypso Tech - Innovative Technology Solutions",
+    seoDescription: initialData?.seoDescription || "Professional web development, mobile apps, and cybersecurity services. Transform your business with our cutting-edge technology solutions.",
+    heroTitle: initialData?.heroTitle || "Transform Your Business with Innovative Technology",
+    heroSubtitle: initialData?.heroSubtitle || "We create powerful digital solutions that drive growth and success"
   });
 
   const handleChange = (field: string, value: string) => {
@@ -43,16 +47,13 @@ export function SiteSettingsForm() {
     }
   };
 
-  const handleSave = () => {
-    // Here you would typically save to a database
-    toast({
-      title: "Settings Saved",
-      description: "Your site settings have been updated successfully.",
-    });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(settings);
   };
 
   return (
-    <div className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 mt-6">
       <Card>
         <CardHeader>
           <CardTitle>General Settings</CardTitle>
@@ -225,11 +226,14 @@ export function SiteSettingsForm() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} className="w-32">
-          Save Settings
+      <div className="flex gap-2 pt-4">
+        <Button type="submit" className="flex-1">
+          {initialData ? "Update Settings" : "Save Settings"}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
