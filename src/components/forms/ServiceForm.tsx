@@ -18,7 +18,8 @@ export function ServiceForm({ initialData, onSave, onCancel }: ServiceFormProps)
     description: initialData?.description || "",
     icon: initialData?.icon || "Globe",
     features: initialData?.features?.join(", ") || "",
-    price: initialData?.price || ""
+    price: initialData?.price || "",
+    category: initialData?.category || "Web Development"
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -58,6 +59,23 @@ export function ServiceForm({ initialData, onSave, onCancel }: ServiceFormProps)
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="category">Category</Label>
+        <Select value={formData.category} onValueChange={(value) => handleChange("category", value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Web Development">Web Development</SelectItem>
+            <SelectItem value="Mobile Development">Mobile Development</SelectItem>
+            <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
+            <SelectItem value="Digital Marketing">Digital Marketing</SelectItem>
+            <SelectItem value="SEO">SEO</SelectItem>
+            <SelectItem value="Consulting">Consulting</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="icon">Icon</Label>
         <Select value={formData.icon} onValueChange={(value) => handleChange("icon", value)}>
           <SelectTrigger>
@@ -68,6 +86,8 @@ export function ServiceForm({ initialData, onSave, onCancel }: ServiceFormProps)
             <SelectItem value="Smartphone">Smartphone (Mobile)</SelectItem>
             <SelectItem value="Code">Code (Development)</SelectItem>
             <SelectItem value="Shield">Shield (Security)</SelectItem>
+            <SelectItem value="Palette">Palette (Design)</SelectItem>
+            <SelectItem value="TrendingUp">TrendingUp (Marketing)</SelectItem>
           </SelectContent>
         </Select>
       </div>

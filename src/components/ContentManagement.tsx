@@ -4,206 +4,235 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
-  Edit, 
-  Trash2, 
-  Plus, 
-  Code, 
-  Smartphone, 
   Globe, 
-  Shield,
-  Users,
-  MessageSquare,
-  Briefcase,
+  Users, 
+  Briefcase, 
+  MessageSquare, 
   Settings,
-  Image,
-  FileText
+  Plus,
+  Edit,
+  Trash2,
+  Search
 } from "lucide-react";
 import { ServiceForm } from "@/components/forms/ServiceForm";
 import { PortfolioForm } from "@/components/forms/PortfolioForm";
 import { TeamForm } from "@/components/forms/TeamForm";
 import { TestimonialForm } from "@/components/forms/TestimonialForm";
 import { SiteSettingsForm } from "@/components/forms/SiteSettingsForm";
-
-// Mock data based on Klypso Tech website
-const initialServices = [
-  {
-    id: 1,
-    title: "Web Development",
-    description: "Custom web applications using modern frameworks",
-    icon: "Globe",
-    features: ["React/Vue/Angular", "Node.js Backend", "Database Integration"],
-    price: "Starting at $2,999"
-  },
-  {
-    id: 2,
-    title: "Mobile App Development",
-    description: "Native and cross-platform mobile applications",
-    icon: "Smartphone",
-    features: ["iOS & Android", "React Native", "Flutter"],
-    price: "Starting at $4,999"
-  },
-  {
-    id: 3,
-    title: "UI/UX Design",
-    description: "User-centered design for optimal user experience",
-    icon: "Code",
-    features: ["Wireframing", "Prototyping", "User Testing"],
-    price: "Starting at $1,999"
-  },
-  {
-    id: 4,
-    title: "Cybersecurity Solutions",
-    description: "Comprehensive security for your digital assets",
-    icon: "Shield",
-    features: ["Security Audits", "Penetration Testing", "Compliance"],
-    price: "Starting at $3,999"
-  }
-];
-
-const initialPortfolio = [
-  {
-    id: 1,
-    title: "E-Commerce Platform",
-    description: "Full-stack e-commerce solution with payment integration",
-    image: "/placeholder.svg",
-    technologies: ["React", "Node.js", "MongoDB"],
-    category: "Web Development",
-    status: "Completed"
-  },
-  {
-    id: 2,
-    title: "Healthcare Mobile App",
-    description: "Patient management system for healthcare providers",
-    image: "/placeholder.svg",
-    technologies: ["React Native", "Firebase"],
-    category: "Mobile Development",
-    status: "In Progress"
-  }
-];
-
-const initialTeam = [
-  {
-    id: 1,
-    name: "John Doe",
-    position: "CEO & Founder",
-    image: "/placeholder.svg",
-    bio: "10+ years of experience in technology leadership",
-    social: { linkedin: "#", twitter: "#" }
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    position: "CTO",
-    image: "/placeholder.svg",
-    bio: "Expert in full-stack development and system architecture",
-    social: { linkedin: "#", github: "#" }
-  }
-];
-
-const initialTestimonials = [
-  {
-    id: 1,
-    name: "Mike Johnson",
-    company: "TechCorp Inc.",
-    role: "CEO",
-    content: "Klypso Tech delivered an exceptional web application that exceeded our expectations.",
-    rating: 5,
-    image: "/placeholder.svg"
-  }
-];
+import { useFirebaseData } from "@/hooks/useFirebaseData";
+import { 
+  servicesService, 
+  portfolioService, 
+  teamService, 
+  testimonialsService, 
+  siteSettingsService 
+} from "@/services/firebaseService";
 
 export function ContentManagement() {
-  const [services, setServices] = useState(initialServices);
-  const [portfolio, setPortfolio] = useState(initialPortfolio);
-  const [team, setTeam] = useState(initialTeam);
-  const [testimonials, setTestimonials] = useState(initialTestimonials);
-  const [editingItem, setEditingItem] = useState(null);
-  const [editingType, setEditingType] = useState("");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("services");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const handleEdit = (item: any, type: string) => {
+  // Firebase data hooks
+  const { data: services, loading: servicesLoading, addItem: addService, updateItem: updateService, deleteItem: deleteService } = useFirebaseData(servicesService, "Service");
+  const { data: portfolio, loading: portfolioLoading, addItem: addPortfolio, updateItem: updatePortfolio, deleteItem: deletePortfolio } = useFirebaseData(portfolioService, "Portfolio");
+  const { data: team, loading: teamLoading, addItem: addTeam, updateItem: updateTeam, deleteItem: deleteTeam } = useFirebaseData(teamService, "Team Member");
+  const { data: testimonials, loading: testimonialsLoading, addItem: addTestimonial, updateItem: updateTestimonial, deleteItem: deleteTestimonial } = useFirebaseData(testimonialsService, "Testimonial");
+  const { data: siteSettings, loading: settingsLoading, addItem: addSetting, updateItem: updateSetting, deleteItem: deleteSetting } = useFirebaseData(siteSettingsService, "Site Setting");
+
+  const handleEdit = (item: any) => {
     setEditingItem(item);
-    setEditingType(type);
-    setIsSheetOpen(true);
+    setDialogOpen(true);
   };
 
-  const handleDelete = (id: number, type: string) => {
-    switch (type) {
-      case 'services':
-        setServices(services.filter(item => item.id !== id));
-        break;
-      case 'portfolio':
-        setPortfolio(portfolio.filter(item => item.id !== id));
-        break;
-      case 'team':
-        setTeam(team.filter(item => item.id !== id));
-        break;
-      case 'testimonials':
-        setTestimonials(testimonials.filter(item => item.id !== id));
-        break;
-    }
-  };
+  const handleSave = async (data: any) => {
+    const currentService = getCurrentService();
+    const currentUpdateFunction = getCurrentUpdateFunction();
+    const currentAddFunction = getCurrentAddFunction();
 
-  const handleSave = (data: any, type: string) => {
-    const newId = Date.now();
-    
-    switch (type) {
-      case 'services':
-        if (editingItem) {
-          setServices(services.map(item => item.id === editingItem.id ? { ...data, id: editingItem.id } : item));
-        } else {
-          setServices([...services, { ...data, id: newId }]);
-        }
-        break;
-      case 'portfolio':
-        if (editingItem) {
-          setPortfolio(portfolio.map(item => item.id === editingItem.id ? { ...data, id: editingItem.id } : item));
-        } else {
-          setPortfolio([...portfolio, { ...data, id: newId }]);
-        }
-        break;
-      case 'team':
-        if (editingItem) {
-          setTeam(team.map(item => item.id === editingItem.id ? { ...data, id: editingItem.id } : item));
-        } else {
-          setTeam([...team, { ...data, id: newId }]);
-        }
-        break;
-      case 'testimonials':
-        if (editingItem) {
-          setTestimonials(testimonials.map(item => item.id === editingItem.id ? { ...data, id: editingItem.id } : item));
-        } else {
-          setTestimonials([...testimonials, { ...data, id: newId }]);
-        }
-        break;
+    if (editingItem) {
+      await currentUpdateFunction(editingItem.id, data);
+    } else {
+      await currentAddFunction(data);
     }
     
     setEditingItem(null);
-    setEditingType("");
-    setIsSheetOpen(false);
+    setDialogOpen(false);
   };
 
-  const getIconComponent = (iconName: string) => {
-    const icons = { Globe, Smartphone, Code, Shield };
-    return icons[iconName as keyof typeof icons] || Globe;
+  const handleDelete = async (id: string) => {
+    const currentDeleteFunction = getCurrentDeleteFunction();
+    await currentDeleteFunction(id);
   };
+
+  const getCurrentService = () => {
+    switch (activeTab) {
+      case "services": return servicesService;
+      case "portfolio": return portfolioService;
+      case "team": return teamService;
+      case "testimonials": return testimonialsService;
+      case "settings": return siteSettingsService;
+      default: return servicesService;
+    }
+  };
+
+  const getCurrentData = () => {
+    switch (activeTab) {
+      case "services": return services;
+      case "portfolio": return portfolio;
+      case "team": return team;
+      case "testimonials": return testimonials;
+      case "settings": return siteSettings;
+      default: return services;
+    }
+  };
+
+  const getCurrentAddFunction = () => {
+    switch (activeTab) {
+      case "services": return addService;
+      case "portfolio": return addPortfolio;
+      case "team": return addTeam;
+      case "testimonials": return addTestimonial;
+      case "settings": return addSetting;
+      default: return addService;
+    }
+  };
+
+  const getCurrentUpdateFunction = () => {
+    switch (activeTab) {
+      case "services": return updateService;
+      case "portfolio": return updatePortfolio;
+      case "team": return updateTeam;
+      case "testimonials": return updateTestimonial;
+      case "settings": return updateSetting;
+      default: return updateService;
+    }
+  };
+
+  const getCurrentDeleteFunction = () => {
+    switch (activeTab) {
+      case "services": return deleteService;
+      case "portfolio": return deletePortfolio;
+      case "team": return deleteTeam;
+      case "testimonials": return deleteTestimonial;
+      case "settings": return deleteSetting;
+      default: return deleteService;
+    }
+  };
+
+  const getCurrentForm = () => {
+    switch (activeTab) {
+      case "services":
+        return <ServiceForm initialData={editingItem} onSave={handleSave} onCancel={() => setDialogOpen(false)} />;
+      case "portfolio":
+        return <PortfolioForm initialData={editingItem} onSave={handleSave} onCancel={() => setDialogOpen(false)} />;
+      case "team":
+        return <TeamForm initialData={editingItem} onSave={handleSave} onCancel={() => setDialogOpen(false)} />;
+      case "testimonials":
+        return <TestimonialForm initialData={editingItem} onSave={handleSave} onCancel={() => setDialogOpen(false)} />;
+      case "settings":
+        return <SiteSettingsForm initialData={editingItem} onSave={handleSave} onCancel={() => setDialogOpen(false)} />;
+      default:
+        return <ServiceForm initialData={editingItem} onSave={handleSave} onCancel={() => setDialogOpen(false)} />;
+    }
+  };
+
+  const getCurrentLoading = () => {
+    switch (activeTab) {
+      case "services": return servicesLoading;
+      case "portfolio": return portfolioLoading;
+      case "team": return teamLoading;
+      case "testimonials": return testimonialsLoading;
+      case "settings": return settingsLoading;
+      default: return servicesLoading;
+    }
+  };
+
+  const filteredData = getCurrentData().filter(item => 
+    Object.values(item).some(value => 
+      typeof value === 'string' && value.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const ContentCard = ({ item }: { item: any }) => (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">
+            {item.title || item.name || item.key || "Untitled"}
+          </CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        {item.company && <Badge variant="secondary">{item.company}</Badge>}
+        {item.role && <Badge variant="secondary">{item.role}</Badge>}
+        {item.category && <Badge variant="secondary">{item.category}</Badge>}
+        {item.rating && (
+          <div className="flex">
+            {[...Array(item.rating)].map((_, i) => (
+              <span key={i} className="text-yellow-400">★</span>
+            ))}
+          </div>
+        )}
+      </CardHeader>
+      <CardContent>
+        <CardDescription className="line-clamp-3">
+          {item.description || item.content || item.value || "No description available"}
+        </CardDescription>
+        {item.price && <p className="text-sm font-semibold mt-2 text-primary">{item.price}</p>}
+        {item.technologies && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {item.technologies.map((tech: string, i: number) => (
+              <Badge key={i} variant="outline" className="text-xs">{tech}</Badge>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Content Management</h1>
-          <p className="text-muted-foreground">Manage your Klypso Tech website content</p>
+          <h2 className="text-3xl font-bold text-foreground">Website Content Management</h2>
+          <p className="text-muted-foreground">Manage all your website content from one place</p>
         </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2" onClick={() => setEditingItem(null)}>
+              <Plus className="w-4 h-4" />
+              Add New
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingItem ? `Edit ${activeTab.slice(0, -1)}` : `Add New ${activeTab.slice(0, -1)}`}
+              </DialogTitle>
+              <DialogDescription>
+                {editingItem ? "Update the details below" : "Fill in the details below to add new content"}
+              </DialogDescription>
+            </DialogHeader>
+            {getCurrentForm()}
+          </DialogContent>
+        </Dialog>
       </div>
 
-      <Tabs defaultValue="services" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="services" className="flex items-center gap-2">
-            <Code className="w-4 h-4" />
+            <Globe className="w-4 h-4" />
             Services
           </TabsTrigger>
           <TabsTrigger value="portfolio" className="flex items-center gap-2">
@@ -220,316 +249,69 @@ export function ContentManagement() {
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
-            Site Settings
+            Settings
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="services" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">Services Management</h2>
-            <Sheet open={isSheetOpen && editingType === 'services'} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                <Button onClick={() => { setEditingItem(null); setEditingType('services'); }} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add Service
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-lg">
-                <SheetHeader>
-                  <SheetTitle>{editingItem ? 'Edit Service' : 'Add New Service'}</SheetTitle>
-                  <SheetDescription>
-                    {editingItem ? 'Update service details' : 'Add a new service to your website'}
-                  </SheetDescription>
-                </SheetHeader>
-                <ServiceForm 
-                  initialData={editingItem} 
-                  onSave={(data) => handleSave(data, 'services')} 
-                  onCancel={() => setIsSheetOpen(false)}
-                />
-              </SheetContent>
-            </Sheet>
+        <div className="mt-6">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search content..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Badge variant="outline" className="text-sm">
+              {filteredData.length} items
+            </Badge>
           </div>
 
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Features</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {services.map((service) => {
-                    const IconComponent = getIconComponent(service.icon);
-                    return (
-                      <TableRow key={service.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <IconComponent className="w-5 h-5 text-primary" />
-                            <div>
-                              <div className="font-medium">{service.title}</div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-xs truncate">{service.description}</div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">{service.price}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {service.features.slice(0, 2).map((feature, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {feature}
-                              </Badge>
-                            ))}
-                            {service.features.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{service.features.length - 2} more
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(service, 'services')}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(service.id, 'services')}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="portfolio" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">Portfolio Management</h2>
-            <Sheet open={isSheetOpen && editingType === 'portfolio'} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                <Button onClick={() => { setEditingItem(null); setEditingType('portfolio'); }} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add Project
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-lg">
-                <SheetHeader>
-                  <SheetTitle>{editingItem ? 'Edit Project' : 'Add New Project'}</SheetTitle>
-                  <SheetDescription>
-                    {editingItem ? 'Update project details' : 'Add a new project to your portfolio'}
-                  </SheetDescription>
-                </SheetHeader>
-                <PortfolioForm 
-                  initialData={editingItem} 
-                  onSave={(data) => handleSave(data, 'portfolio')} 
-                  onCancel={() => setIsSheetOpen(false)}
-                />
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {portfolio.map((project) => (
-              <Card key={project.id} className="overflow-hidden">
-                <div className="aspect-video bg-muted flex items-center justify-center">
-                  <Image className="w-8 h-8 text-muted-foreground" />
+          {getCurrentLoading() ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader>
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                    <div className="h-3 bg-muted rounded w-1/2"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-muted rounded"></div>
+                      <div className="h-3 bg-muted rounded w-5/6"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <TabsContent value={activeTab} className="mt-0">
+              {filteredData.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Globe className="w-12 h-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No content found</h3>
+                    <p className="text-muted-foreground mb-4">
+                      {searchTerm ? "No items match your search." : "Get started by adding your first item."}
+                    </p>
+                    <Button onClick={() => setDialogOpen(true)} className="gap-2">
+                      <Plus className="w-4 h-4" />
+                      Add New {activeTab.slice(0, -1)}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredData.map((item) => (
+                    <ContentCard key={item.id} item={item} />
+                  ))}
                 </div>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{project.title}</CardTitle>
-                    <Badge variant={project.status === 'Completed' ? 'default' : 'secondary'}>
-                      {project.status}
-                    </Badge>
-                  </div>
-                  <CardDescription>{project.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {project.technologies.map((tech, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(project, 'portfolio')}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(project.id, 'portfolio')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="team" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">Team Management</h2>
-            <Sheet open={isSheetOpen && editingType === 'team'} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                <Button onClick={() => { setEditingItem(null); setEditingType('team'); }} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add Team Member
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-lg">
-                <SheetHeader>
-                  <SheetTitle>{editingItem ? 'Edit Team Member' : 'Add New Team Member'}</SheetTitle>
-                  <SheetDescription>
-                    {editingItem ? 'Update team member details' : 'Add a new team member'}
-                  </SheetDescription>
-                </SheetHeader>
-                <TeamForm 
-                  initialData={editingItem} 
-                  onSave={(data) => handleSave(data, 'team')} 
-                  onCancel={() => setIsSheetOpen(false)}
-                />
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {team.map((member) => (
-              <Card key={member.id}>
-                <CardHeader className="text-center">
-                  <div className="w-20 h-20 bg-muted rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Users className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                  <CardTitle>{member.name}</CardTitle>
-                  <CardDescription>{member.position}</CardDescription>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-sm text-muted-foreground mb-4">{member.bio}</p>
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(member, 'team')}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(member.id, 'team')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="testimonials" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">Testimonials Management</h2>
-            <Sheet open={isSheetOpen && editingType === 'testimonials'} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                <Button onClick={() => { setEditingItem(null); setEditingType('testimonials'); }} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add Testimonial
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-lg">
-                <SheetHeader>
-                  <SheetTitle>{editingItem ? 'Edit Testimonial' : 'Add New Testimonial'}</SheetTitle>
-                  <SheetDescription>
-                    {editingItem ? 'Update testimonial details' : 'Add a new client testimonial'}
-                  </SheetDescription>
-                </SheetHeader>
-                <TestimonialForm 
-                  initialData={editingItem} 
-                  onSave={(data) => handleSave(data, 'testimonials')} 
-                  onCancel={() => setIsSheetOpen(false)}
-                />
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            {testimonials.map((testimonial) => (
-              <Card key={testimonial.id}>
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                      <Users className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{testimonial.name}</CardTitle>
-                      <CardDescription>{testimonial.role} at {testimonial.company}</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm mb-4">"{testimonial.content}"</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <span key={i} className="text-yellow-400">★</span>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(testimonial, 'testimonials')}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(testimonial.id, 'testimonials')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Site Settings</h2>
-            <SiteSettingsForm />
-          </div>
-        </TabsContent>
+              )}
+            </TabsContent>
+          )}
+        </div>
       </Tabs>
     </div>
   );

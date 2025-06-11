@@ -19,7 +19,8 @@ export function TestimonialForm({ initialData, onSave, onCancel }: TestimonialFo
     role: initialData?.role || "",
     content: initialData?.content || "",
     rating: initialData?.rating?.toString() || "5",
-    image: initialData?.image || "/placeholder.svg"
+    image: initialData?.image || "/placeholder.svg",
+    location: initialData?.location || ""
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -66,6 +67,16 @@ export function TestimonialForm({ initialData, onSave, onCancel }: TestimonialFo
           onChange={(e) => handleChange("role", e.target.value)}
           placeholder="Enter client's role"
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="location">Location</Label>
+        <Input
+          id="location"
+          value={formData.location}
+          onChange={(e) => handleChange("location", e.target.value)}
+          placeholder="Enter location (optional)"
         />
       </div>
 
