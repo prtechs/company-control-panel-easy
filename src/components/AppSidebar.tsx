@@ -21,11 +21,12 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
-  SidebarTrigger
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
   {
@@ -73,16 +74,35 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error,
+        variant: 'destructive'
+      });
+    } else {
+      toast({
+        title: 'Signed Out',
+        description: 'You have been successfully signed out.'
+      });
+    }
+  };
+
   return (
     <Sidebar className="border-r border-border">
       <SidebarHeader className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">AC</span>
+            <span className="text-primary-foreground font-bold text-sm">KT</span>
           </div>
           <div>
-            <h2 className="font-semibold text-sidebar-foreground">Admin Control</h2>
-            <p className="text-xs text-muted-foreground">Company Dashboard</p>
+            <h2 className="font-semibold text-sidebar-foreground">Klypso Tech</h2>
+            <p className="text-xs text-muted-foreground">Admin Dashboard</p>
           </div>
         </div>
       </SidebarHeader>
@@ -123,17 +143,22 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 mb-3">
           <Avatar className="w-8 h-8">
             <AvatarImage src="/placeholder.svg" />
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">AD</AvatarFallback>
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+              {user?.email?.charAt(0).toUpperCase() || 'A'}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">Admin User</p>
-            <p className="text-xs text-muted-foreground truncate">admin@company.com</p>
+            <p className="text-sm font-medium text-sidebar-foreground truncate">
+              {user?.email || 'Admin User'}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">Administrator</p>
           </div>
         </div>
         <Button 
           variant="ghost" 
           size="sm" 
           className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+          onClick={handleSignOut}
         >
           <LogOut className="w-4 h-4" />
           Sign Out
